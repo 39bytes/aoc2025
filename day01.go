@@ -1,27 +1,20 @@
 package main
 
 import (
-	"bufio"
+	"aoc2025/util"
 	"fmt"
 	"log"
-	"os"
 	"strconv"
 )
 
 func getInput(path string) ([]int, error) {
-	file, err := os.Open(path)
+	var rotations []int
+	lines, err := util.Lines(path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
 
-	scanner := bufio.NewScanner(file)
-
-	var rotations []int
-
-	for scanner.Scan() {
-		line := scanner.Text()
-
+	for _, line := range lines {
 		dir := line[0]
 		count, err := strconv.Atoi(line[1:])
 		if err != nil {
@@ -33,23 +26,7 @@ func getInput(path string) ([]int, error) {
 		rotations = append(rotations, count)
 	}
 
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
 	return rotations, nil
-}
-
-func mod(a, b int) int {
-	return (a%b + b) % b
-}
-
-func abs(a int) int {
-	if a < 0 {
-		return -a
-	} else {
-		return a
-	}
 }
 
 func part1(rotations []int) int {
@@ -58,7 +35,7 @@ func part1(rotations []int) int {
 
 	for _, rot := range rotations {
 		cur += rot
-		cur = mod(cur, 100)
+		cur = util.Mod(cur, 100)
 		if cur == 0 {
 			ans++
 		}
@@ -72,14 +49,14 @@ func part2(rotations []int) int {
 	ans := 0
 
 	for _, rot := range rotations {
-		turns := abs(rot) / 100
+		turns := util.Abs(rot) / 100
 		rem := rot % 100
 		nxt := cur + rem
-		if abs(rem) > 0 && ((nxt <= 0 && cur != 0) || nxt >= 100) {
+		if util.Abs(rem) > 0 && ((nxt <= 0 && cur != 0) || nxt >= 100) {
 			ans++
 		}
 		ans += turns
-		cur = mod(nxt, 100)
+		cur = util.Mod(nxt, 100)
 	}
 
 	return ans
