@@ -4,17 +4,11 @@ import (
 	"bufio"
 	"fmt"
 	"log"
-	"math"
 	"os"
 	"strconv"
 )
 
-type Rotation struct {
-	dir   byte
-	count int
-}
-
-func getInput(path string) ([]Rotation, error) {
+func getInput(path string) ([]int, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -23,7 +17,7 @@ func getInput(path string) ([]Rotation, error) {
 
 	scanner := bufio.NewScanner(file)
 
-	var rotations []Rotation
+	var rotations []int
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -33,10 +27,10 @@ func getInput(path string) ([]Rotation, error) {
 		if err != nil {
 			return nil, err
 		}
-		rotations = append(rotations, Rotation{
-			dir,
-			count,
-		})
+		if dir == 'L' {
+			count = -count
+		}
+		rotations = append(rotations, count)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -50,16 +44,20 @@ func mod(a, b int) int {
 	return (a%b + b) % b
 }
 
-func part1(rotations []Rotation) int {
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	} else {
+		return a
+	}
+}
+
+func part1(rotations []int) int {
 	cur := 50
 	ans := 0
 
 	for _, rot := range rotations {
-		if rot.dir == 'L' {
-			cur -= rot.count
-		} else {
-			cur += rot.count
-		}
+		cur += rot
 		cur = mod(cur, 100)
 		if cur == 0 {
 			ans++
@@ -69,29 +67,19 @@ func part1(rotations []Rotation) int {
 	return ans
 }
 
-func part2(rotations []Rotation) int {
+func part2(rotations []int) int {
 	cur := 50
 	ans := 0
 
 	for _, rot := range rotations {
-		before := cur
-		if rot.dir == 'L' {
-			cur -= rot.count
-
-			if before == 0 {
-				ans += int(math.Abs(math.Floor(float64(cur)/100.0))) - 1
-			} else {
-				ans += int(math.Abs(math.Floor(float64(cur) / 100.0)))
-			}
-			cur = mod(cur, 100)
-			if cur == 0 {
-				ans++
-			}
-		} else {
-			cur += rot.count
-			ans += int(math.Abs(math.Floor(float64(cur) / 100.0)))
-			cur = mod(cur, 100)
+		turns := abs(rot) / 100
+		rem := rot % 100
+		nxt := cur + rem
+		if abs(rem) > 0 && ((nxt <= 0 && cur != 0) || nxt >= 100) {
+			ans++
 		}
+		ans += turns
+		cur = mod(nxt, 100)
 	}
 
 	return ans
