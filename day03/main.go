@@ -7,14 +7,20 @@ import (
 )
 
 func largest(line []byte, n int) int64 {
-	last := -1
-	ans := int64(0)
+	var stack []byte
 
-	for i := range n {
-		end := len(line) - n + i + 1
-		best := last + 1 + util.MaxIndex(line[last+1:end])
-		ans = ans*10 + int64(line[best]-'0')
-		last = best
+	for i := range len(line) {
+		for len(stack) > 0 && n-len(stack) < len(line)-i && stack[len(stack)-1] < line[i] {
+			stack = stack[:len(stack)-1]
+		}
+		if len(stack) < n {
+			stack = append(stack, line[i])
+		}
+	}
+
+	ans := int64(0)
+	for _, x := range stack {
+		ans = ans*10 + int64(x-'0')
 	}
 	return ans
 }
